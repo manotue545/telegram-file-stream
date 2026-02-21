@@ -1,83 +1,72 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player de Vídeo - Telegram</title>
+    <title>Player Seguro</title>
     <style>
         body {
-            margin: 0;
-            padding: 20px;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .player-container {
             max-width: 800px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            margin: 0 auto;
             padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 {
+            background: #1a1a2e;
             color: white;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
         }
-        video {
-            width: 100%;
+        
+        .player-container {
+            background: #16213e;
             border-radius: 10px;
+            padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .info {
-            margin-top: 15px;
-            color: white;
-            text-align: center;
-            font-size: 14px;
-            word-break: break-all;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 10px;
-        }
-        .download-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            text-decoration: none;
+        
+        video {
+            width: 100%;
             border-radius: 5px;
-            transition: background 0.3s;
         }
-        .download-btn:hover {
-            background: #45a049;
+        
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 5px;
+        }
+        
+        .warning {
+            color: #ffd700;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="player-container">
-        <h1>🎬 Player de Vídeo - Telegram</h1>
+        <h1>🎬 Player Seguro</h1>
         
-        <video controls autoplay muted>
-            <source src="https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4" type="video/mp4">
-            Seu navegador não suporta a tag de vídeo.
+        <!-- O token NÃO aparece aqui, apenas o file_id -->
+        <video id="videoPlayer" controls>
+            <source src="/api/video/BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
         </video>
         
         <div class="info">
-            <p><strong>URL do vídeo:</strong></p>
-            <p>https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4</p>
-            <a href="https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4" 
-               class="download-btn" 
-               download="video_telegram.mp4">
-                ⬇️ Baixar Vídeo
-            </a>
+            <p>✅ Este player é seguro - o token do bot está protegido no servidor</p>
+            <p>🔒 Qualquer tentativa de inspecionar o código não revelará informações sensíveis</p>
+        </div>
+        
+        <div class="warning">
+            ⚠️ Apenas o file_id fica exposto, o que é seguro e necessário para identificar o vídeo
         </div>
     </div>
+    
+    <script>
+        // Mesmo inspecionando, ninguém vê o token
+        const video = document.getElementById('videoPlayer');
+        
+        video.addEventListener('error', (e) => {
+            console.error('Erro ao carregar vídeo:', e);
+            alert('Erro ao carregar vídeo. Tente novamente mais tarde.');
+        });
+    </script>
 </body>
 </html>
