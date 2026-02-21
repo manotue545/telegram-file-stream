@@ -1,115 +1,172 @@
-<?php
-// proxy.php - Versão corrigida
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // Desligar exibição de erros para não corromper o vídeo
-
-$token = "8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ";
-$file_id = $_GET['file_id'] ?? '';
-
-if (empty($file_id)) {
-    header('HTTP/1.0 400 Bad Request');
-    die('File ID não fornecido');
-}
-
-// Headers CORS e cache
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Cache-Control: public, max-age=3600');
-
-// Responder a requisições OPTIONS (preflight)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Headers: Range');
-    header('HTTP/1.1 200 OK');
-    exit();
-}
-
-// Obter informações do arquivo
-$getFile_url = "https://api.telegram.org/bot{$token}/getFile?file_id=" . urlencode($file_id);
-$ch = curl_init($getFile_url);
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_SSL_VERIFYPEER => false,
-    CURLOPT_TIMEOUT => 30,
-    CURLOPT_USERAGENT => 'Telegram-Proxy/1.0'
-]);
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-if ($httpCode !== 200) {
-    header('HTTP/1.0 502 Bad Gateway');
-    die('Erro ao conectar com Telegram');
-}
-
-$data = json_decode($response, true);
-if (!$data['ok']) {
-    header('HTTP/1.0 404 Not Found');
-    die('Arquivo não encontrado: ' . ($data['description'] ?? 'desconhecido'));
-}
-
-$file_path = $data['result']['file_path'];
-$file_url = "https://api.telegram.org/file/bot{$token}/{$file_path}";
-
-// Determinar o content-type baseado na extensão
-$extensao = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
-$content_types = [
-    'mp4' => 'video/mp4',
-    'webm' => 'video/webm',
-    'ogg' => 'video/ogg',
-    'mov' => 'video/quicktime',
-    'avi' => 'video/x-msvideo',
-    'mkv' => 'video/x-matroska'
-];
-$content_type = $content_types[$extensao] ?? 'video/mp4';
-
-// IMPORTANTE: Headers específicos para vídeo
-header("Content-Type: $content_type");
-header('Accept-Ranges: bytes');
-
-// Suporte a Range requests (para permitir arrastar o vídeo)
-if (isset($_SERVER['HTTP_RANGE'])) {
-    // Fazer requisição com range para o Telegram
-    $ch = curl_init($file_url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_HTTPHEADER => ['Range: ' . $_SERVER['HTTP_RANGE']]
-    ]);
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Player de Vídeo</title>
+    <style>
+        .video-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+        
+        video {
+            width: 100%;
+            background: #000;
+            border-radius: 5px;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #2a2a2a;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <h2 style="color: white;">Player de Vídeo</h2>
+        
+        <video id="meuVideo" controls preload="auto" crossorigin="anonymous">
+            <source src="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
+            Seu navegador não suporta vídeo HTML5.
+        </video>
+        
+        <div class="error-message" id="erroVideo" style="display: none;"></div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="testarVideo()">Testar Vídeo</button>
+            <button onclick="recarregarVideo()">Recarregar Vídeo</button>
+            <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
+               style="color: white; background: #4CAF50; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
+                Baixar Vídeo
+            </a>
+        </div>
+        
+        <div class="debug-info" id="debugInfo">
+            Aguardando informações...
+        </div>
+    </div>
     
-    $content = curl_exec($ch);
-    $info = curl_getinfo($ch);
-    $httpCode = $info['http_code'];
-    curl_close($ch);
-    
-    if ($httpCode == 206) {
-        header('HTTP/1.1 206 Partial Content');
-        // Extrair Content-Range do response do Telegram
-        // Nota: Isso é simplificado - em produção você precisaria capturar os headers
-        header('Content-Range: bytes ' . 
-               $_SERVER['HTTP_RANGE'] . '/' . 
-               ($info['size_download'] + $info['header_size']));
-    }
-} else {
-    // Download normal
-    $ch = curl_init($file_url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT => 0
-    ]);
-    $content = curl_exec($ch);
-    curl_close($ch);
-}
-
-// Se for solicitado download, força o nome do arquivo
-if (isset($_GET['download'])) {
-    $filename = basename($file_path);
-    header("Content-Disposition: attachment; filename=\"" . addslashes($filename) . "\"");
-}
-
-// Enviar o conteúdo
-echo $content;
-?>
+    <script>
+        const video = document.getElementById('meuVideo');
+        const erroVideo = document.getElementById('erroVideo');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        function logDebug(mensagem) {
+            debugInfo.innerHTML += mensagem + '<br>';
+        }
+        
+        // Testar se o proxy está acessível
+        async function testarProxy() {
+            try {
+                logDebug('🔍 Testando proxy...');
+                const response = await fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
+                    method: 'HEAD'
+                });
+                
+                logDebug(`📊 Status do proxy: ${response.status} ${response.statusText}`);
+                logDebug(`📦 Headers: ${JSON.stringify([...response.headers])}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Proxy retornou status ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                logDebug(`❌ Erro no proxy: ${error.message}`);
+                return false;
+            }
+        }
+        
+        // Testar carregamento do vídeo
+        function testarVideo() {
+            logDebug('🎬 Testando carregamento do vídeo...');
+            
+            // Verificar se o navegador suporta o formato
+            const canPlay = video.canPlayType('video/mp4');
+            logDebug(`🔧 Suporte a MP4: ${canPlay || 'não suportado'}`);
+            
+            // Tentar carregar o vídeo
+            video.load();
+        }
+        
+        // Recarregar vídeo
+        function recarregarVideo() {
+            logDebug('🔄 Recarregando vídeo...');
+            video.load();
+        }
+        
+        // Eventos do vídeo
+        video.addEventListener('loadstart', () => {
+            logDebug('📥 Iniciando carregamento...');
+        });
+        
+        video.addEventListener('loadedmetadata', () => {
+            logDebug(`✅ Metadados carregados: ${video.videoWidth}x${video.videoHeight}`);
+            logDebug(`⏱️ Duração: ${video.duration} segundos`);
+        });
+        
+        video.addEventListener('loadeddata', () => {
+            logDebug('✅ Dados do vídeo carregados');
+        });
+        
+        video.addEventListener('canplay', () => {
+            logDebug('▶️ Pronto para reproduzir');
+        });
+        
+        video.addEventListener('waiting', () => {
+            logDebug('⏳ Bufferizando...');
+        });
+        
+        video.addEventListener('error', (e) => {
+            const error = video.error;
+            let mensagem = '❌ Erro no vídeo: ';
+            
+            switch(error.code) {
+                case MediaError.MEDIA_ERR_ABORTED:
+                    mensagem += 'Carregamento abortado';
+                    break;
+                case MediaError.MEDIA_ERR_NETWORK:
+                    mensagem += 'Erro de rede';
+                    break;
+                case MediaError.MEDIA_ERR_DECODE:
+                    mensagem += 'Erro de decodificação';
+                    break;
+                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                    mensagem += 'Formato não suportado';
+                    break;
+                default:
+                    mensagem += 'Erro desconhecido';
+            }
+            
+            logDebug(mensagem);
+            erroVideo.style.display = 'block';
+            erroVideo.textContent = mensagem;
+        });
+        
+        // Iniciar testes
+        testarProxy().then(sucesso => {
+            if (sucesso) {
+                testarVideo();
+            }
+        });
+    </script>
+</body>
+</html>
