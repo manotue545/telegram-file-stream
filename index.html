@@ -1,58 +1,17 @@
-from flask import Flask, jsonify, send_file
-from flask_cors import CORS
-import requests
-import os
-
-app = Flask(__name__)
-CORS(app)  # Cuidado com CORS em produção
-
-TOKEN = "8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ"  # Mantido seguro no servidor
-
-@app.route('/api/video/<file_id>')
-def get_video(file_id):
-    """Endpoint que retorna o vídeo sem expor o token"""
-    try:
-        # Primeiro, pega o file_path do vídeo
-        file_info_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={file_id}"
-        file_info = requests.get(file_info_url).json()
-        
-        if not file_info.get('ok'):
-            return jsonify({'error': 'File not found'}), 404
-        
-        file_path = file_info['result']['file_path']
-        
-        # Agora baixa o vídeo do Telegram
-        video_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
-        video_response = requests.get(video_url, stream=True)
-        
-        # Retorna o vídeo diretamente para o cliente
-        return send_file(
-            video_response.raw,
-            mimetype='video/mp4',
-            as_attachment=False,
-            download_name='video.mp4'
-        )
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/video-info/<file_id>')
-def get_video_info(file_id):
-    """Endpoint que retorna informações do vídeo sem expor o token"""
-    try:
-        file_info_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={file_id}"
-        file_info = requests.get(file_info_url).json()
-        
-        if not file_info.get('ok'):
-            return jsonify({'error': 'File not found'}), 404
-        
-        return jsonify({
-            'file_path': file_info['result']['file_path'],
-            'file_size': file_info['result'].get('file_size', 0)
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=False)  # debug=False em produção
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Player de Vídeo</title>
+</head>
+<body>
+    <video controls id="videoPlayer" width="800">
+        <source src="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
+    </video>
+    
+    <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
+       download="video.mp4">
+        Baixar Vídeo
+    </a>
+</body>
+</html>
