@@ -1,72 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Player Seguro</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #1a1a2e;
-            color: white;
-        }
+from flask import Flask, jsonify, send_file
+from flask_cors import CORS
+import requests
+import os
+
+app = Flask(__name__)
+CORS(app)  # Cuidado com CORS em produção
+
+TOKEN = "8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ"  # Mantido seguro no servidor
+
+@app.route('/api/video/<file_id>')
+def get_video(file_id):
+    """Endpoint que retorna o vídeo sem expor o token"""
+    try:
+        # Primeiro, pega o file_path do vídeo
+        file_info_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={file_id}"
+        file_info = requests.get(file_info_url).json()
         
-        .player-container {
-            background: #16213e;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        if not file_info.get('ok'):
+            return jsonify({'error': 'File not found'}), 404
         
-        video {
-            width: 100%;
-            border-radius: 5px;
-        }
+        file_path = file_info['result']['file_path']
         
-        .info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #0f3460;
-            border-radius: 5px;
-        }
+        # Agora baixa o vídeo do Telegram
+        video_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
+        video_response = requests.get(video_url, stream=True)
         
-        .warning {
-            color: #ffd700;
-            font-size: 14px;
-            margin-top: 20px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="player-container">
-        <h1>🎬 Player Seguro</h1>
+        # Retorna o vídeo diretamente para o cliente
+        return send_file(
+            video_response.raw,
+            mimetype='video/mp4',
+            as_attachment=False,
+            download_name='video.mp4'
+        )
         
-        <!-- O token NÃO aparece aqui, apenas o file_id -->
-        <video id="videoPlayer" controls>
-            <source src="/api/video/BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
-        </video>
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/video-info/<file_id>')
+def get_video_info(file_id):
+    """Endpoint que retorna informações do vídeo sem expor o token"""
+    try:
+        file_info_url = f"https://api.telegram.org/bot{TOKEN}/getFile?file_id={file_id}"
+        file_info = requests.get(file_info_url).json()
         
-        <div class="info">
-            <p>✅ Este player é seguro - o token do bot está protegido no servidor</p>
-            <p>🔒 Qualquer tentativa de inspecionar o código não revelará informações sensíveis</p>
-        </div>
+        if not file_info.get('ok'):
+            return jsonify({'error': 'File not found'}), 404
         
-        <div class="warning">
-            ⚠️ Apenas o file_id fica exposto, o que é seguro e necessário para identificar o vídeo
-        </div>
-    </div>
-    
-    <script>
-        // Mesmo inspecionando, ninguém vê o token
-        const video = document.getElementById('videoPlayer');
+        return jsonify({
+            'file_path': file_info['result']['file_path'],
+            'file_size': file_info['result'].get('file_size', 0)
+        })
         
-        video.addEventListener('error', (e) => {
-            console.error('Erro ao carregar vídeo:', e);
-            alert('Erro ao carregar vídeo. Tente novamente mais tarde.');
-        });
-    </script>
-</body>
-</html>
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=False)  # debug=False em produção
