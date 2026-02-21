@@ -2,16 +2,88 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Player de Vídeo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player de Vídeo Seguro</title>
+    <style>
+        .error-box {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: none;
+        }
+        video {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
 </head>
 <body>
-    <video controls id="videoPlayer" width="800">
+    <h1>Player de Vídeo</h1>
+    
+    <div id="errorMessage" class="error-box"></div>
+    
+    <video id="videoPlayer" controls width="800" preload="auto">
         <source src="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
+        Seu navegador não suporta vídeo HTML5.
     </video>
     
-    <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
-       download="video.mp4">
-        Baixar Vídeo
-    </a>
+    <div style="margin-top: 20px;">
+        <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
+           class="download-btn" 
+           style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+            ⬇️ Baixar Vídeo
+        </a>
+    </div>
+    
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const errorBox = document.getElementById('errorMessage');
+        
+        video.addEventListener('error', function(e) {
+            console.error('Erro no vídeo:', e);
+            
+            let errorMsg = 'Erro ao carregar o vídeo. ';
+            
+            if (video.error) {
+                switch(video.error.code) {
+                    case MediaError.MEDIA_ERR_ABORTED:
+                        errorMsg += 'Carregamento abortado.';
+                        break;
+                    case MediaError.MEDIA_ERR_NETWORK:
+                        errorMsg += 'Erro de rede.';
+                        break;
+                    case MediaError.MEDIA_ERR_DECODE:
+                        errorMsg += 'Erro ao decodificar.';
+                        break;
+                    case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        errorMsg += 'Formato não suportado.';
+                        break;
+                    default:
+                        errorMsg += 'Erro desconhecido.';
+                }
+            }
+            
+            errorBox.textContent = errorMsg;
+            errorBox.style.display = 'block';
+        });
+        
+        // Testar se o proxy está funcionando
+        fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
+            method: 'HEAD'
+        })
+        .then(response => {
+            if (!response.ok) {
+                errorBox.textContent = 'Proxy não está respondendo corretamente. Código: ' + response.status;
+                errorBox.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            errorBox.textContent = 'Erro de conexão com o proxy: ' + error.message;
+            errorBox.style.display = 'block';
+        });
+    </script>
 </body>
 </html>
