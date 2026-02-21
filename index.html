@@ -2,171 +2,257 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Player de Vídeo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Vídeo - Proxy vs Direto</title>
     <style>
-        .video-container {
-            max-width: 800px;
-            margin: 20px auto;
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            margin: 0;
             padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .player-section {
             background: #1a1a1a;
             border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
         }
-        
+        h2 {
+            margin-top: 0;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #ff9800;
+        }
         video {
             width: 100%;
+            border-radius: 8px;
             background: #000;
-            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        
-        .error-message {
-            color: #ff6b6b;
+        .status {
+            margin-top: 15px;
             padding: 10px;
-            background: #2a2a2a;
             border-radius: 5px;
-            margin: 10px 0;
-        }
-        
-        .debug-info {
-            margin-top: 20px;
-            padding: 10px;
-            background: #2a2a2a;
-            color: #00ff00;
             font-family: monospace;
-            font-size: 12px;
+        }
+        .success {
+            background: #1e3a1e;
+            color: #4CAF50;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background: #3a1e1e;
+            color: #ff6b6b;
+            border-left: 4px solid #ff6b6b;
+        }
+        .info {
+            background: #1e2a3a;
+            color: #64b5f6;
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 10px 20px;
             border-radius: 5px;
-            max-height: 200px;
-            overflow: auto;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #444;
+        }
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            background: #45a049;
         }
     </style>
 </head>
 <body>
-    <div class="video-container">
-        <h2 style="color: white;">Player de Vídeo</h2>
+    <div class="container">
+        <h1>🎥 Teste de Player - Proxy vs Link Direto</h1>
         
-        <video id="meuVideo" controls preload="auto" crossorigin="anonymous">
-            <source src="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
-            Seu navegador não suporta vídeo HTML5.
-        </video>
-        
-        <div class="error-message" id="erroVideo" style="display: none;"></div>
-        
-        <div style="margin-top: 20px;">
-            <button onclick="testarVideo()">Testar Vídeo</button>
-            <button onclick="recarregarVideo()">Recarregar Vídeo</button>
-            <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
-               style="color: white; background: #4CAF50; padding: 5px 10px; text-decoration: none; border-radius: 3px;">
-                Baixar Vídeo
-            </a>
+        <!-- PLAYER 1: Link Direto (DEVE FUNCIONAR) -->
+        <div class="player-section">
+            <h2>
+                ✅ PLAYER 1 - LINK DIRETO (funciona)
+                <span class="badge">controle</span>
+            </h2>
+            <video id="playerDireto" controls preload="auto">
+                <source src="https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4" type="video/mp4">
+            </video>
+            <div class="status success" id="statusDireto">
+                ⏳ Carregando...
+            </div>
         </div>
         
-        <div class="debug-info" id="debugInfo">
-            Aguardando informações...
+        <!-- PLAYER 2: Proxy (DEVE FUNCIONAR APÓS CORREÇÃO) -->
+        <div class="player-section">
+            <h2>
+                🔧 PLAYER 2 - PROXY (em teste)
+                <span class="badge">proxy.php</span>
+            </h2>
+            <video id="playerProxy" controls preload="auto">
+                <source src="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
+            </video>
+            <div class="status info" id="statusProxy">
+                ⏳ Testando proxy...
+            </div>
+            <div style="margin-top: 15px;">
+                <button onclick="testarProxy()">🔄 Testar Proxy Agora</button>
+                <button onclick="recarregarProxy()">📥 Recarregar Vídeo</button>
+                <a href="proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
+                   class="download-btn" target="_blank">
+                    ⬇️ Baixar via Proxy
+                </a>
+            </div>
+        </div>
+        
+        <!-- INFORMAÇÕES DE DEBUG -->
+        <div class="player-section" style="background: #0a0a0a;">
+            <h2>🔍 Diagnóstico</h2>
+            <div id="debugInfo" style="font-family: monospace; white-space: pre-wrap;"></div>
         </div>
     </div>
     
     <script>
-        const video = document.getElementById('meuVideo');
-        const erroVideo = document.getElementById('erroVideo');
+        const playerDireto = document.getElementById('playerDireto');
+        const playerProxy = document.getElementById('playerProxy');
+        const statusDireto = document.getElementById('statusDireto');
+        const statusProxy = document.getElementById('statusProxy');
         const debugInfo = document.getElementById('debugInfo');
         
-        function logDebug(mensagem) {
-            debugInfo.innerHTML += mensagem + '<br>';
+        function log(msg, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML += `[${timestamp}] ${msg}\n`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
         }
         
-        // Testar se o proxy está acessível
+        // Monitorar PLAYER DIRETO
+        playerDireto.addEventListener('loadedmetadata', () => {
+            statusDireto.className = 'status success';
+            statusDireto.innerHTML = `✅ OK - ${playerDireto.videoWidth}x${playerDireto.videoHeight} | ${Math.round(playerDireto.duration)}s`;
+            log('✅ Player Direto: vídeo carregado com sucesso');
+        });
+        
+        playerDireto.addEventListener('error', (e) => {
+            statusDireto.className = 'status error';
+            statusDireto.innerHTML = '❌ Erro no player direto (inesperado!)';
+            log('❌ Player Direto: erro - ' + (playerDireto.error?.message || 'desconhecido'));
+        });
+        
+        // Monitorar PLAYER PROXY
+        playerProxy.addEventListener('loadedmetadata', () => {
+            statusProxy.className = 'status success';
+            statusProxy.innerHTML = `✅ FUNCIONOU! - ${playerProxy.videoWidth}x${playerProxy.videoHeight}`;
+            log('✅ Player Proxy: VÍDEO CARREGADO COM SUCESSO!');
+        });
+        
+        playerProxy.addEventListener('error', (e) => {
+            statusProxy.className = 'status error';
+            statusProxy.innerHTML = '❌ Erro no proxy';
+            log('❌ Player Proxy: erro ao carregar');
+            
+            // Tentar identificar o erro
+            if (playerProxy.error) {
+                log(`   Código: ${playerProxy.error.code}`);
+                log(`   Mensagem: ${playerProxy.error.message}`);
+            }
+        });
+        
+        // Testar proxy via fetch
         async function testarProxy() {
+            log('🔍 Iniciando teste do proxy...');
+            
             try {
-                logDebug('🔍 Testando proxy...');
-                const response = await fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
+                // Teste 1: HEAD request
+                log('📡 Testando HEAD request...');
+                const headResponse = await fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
                     method: 'HEAD'
                 });
                 
-                logDebug(`📊 Status do proxy: ${response.status} ${response.statusText}`);
-                logDebug(`📦 Headers: ${JSON.stringify([...response.headers])}`);
+                log(`📊 Status HEAD: ${headResponse.status}`);
                 
-                if (!response.ok) {
-                    throw new Error(`Proxy retornou status ${response.status}`);
+                // Headers recebidos
+                const headers = {};
+                headResponse.headers.forEach((value, key) => {
+                    headers[key] = value;
+                    log(`   ${key}: ${value}`);
+                });
+                
+                // Verificar Content-Type
+                if (!headers['content-type']?.includes('video/')) {
+                    log('⚠️ ERRO: Content-Type não é de vídeo!');
+                } else {
+                    log('✅ Content-Type correto: ' + headers['content-type']);
                 }
                 
-                return true;
+                // Teste 2: Tentar baixar os primeiros bytes
+                log('📦 Testando range request...');
+                const rangeResponse = await fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
+                    headers: {
+                        'Range': 'bytes=0-1023'
+                    }
+                });
+                
+                log(`📊 Status range: ${rangeResponse.status}`);
+                
+                if (rangeResponse.status === 206) {
+                    log('✅ Range requests funcionando!');
+                    const blob = await rangeResponse.blob();
+                    log(`📦 Tamanho do chunk: ${blob.size} bytes`);
+                } else {
+                    log('⚠️ Range requests NÃO funcionando');
+                }
+                
+                // Teste 3: Tentar baixar via curl (simulado)
+                log('🌐 Testando download completo (simulado)...');
+                const testResponse = await fetch('proxy.php?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ');
+                log(`📊 Status download: ${testResponse.status}`);
+                
+                if (testResponse.ok) {
+                    const contentType = testResponse.headers.get('content-type');
+                    log(`📌 Content-Type final: ${contentType}`);
+                }
+                
             } catch (error) {
-                logDebug(`❌ Erro no proxy: ${error.message}`);
-                return false;
-            }
-        }
-        
-        // Testar carregamento do vídeo
-        function testarVideo() {
-            logDebug('🎬 Testando carregamento do vídeo...');
-            
-            // Verificar se o navegador suporta o formato
-            const canPlay = video.canPlayType('video/mp4');
-            logDebug(`🔧 Suporte a MP4: ${canPlay || 'não suportado'}`);
-            
-            // Tentar carregar o vídeo
-            video.load();
-        }
-        
-        // Recarregar vídeo
-        function recarregarVideo() {
-            logDebug('🔄 Recarregando vídeo...');
-            video.load();
-        }
-        
-        // Eventos do vídeo
-        video.addEventListener('loadstart', () => {
-            logDebug('📥 Iniciando carregamento...');
-        });
-        
-        video.addEventListener('loadedmetadata', () => {
-            logDebug(`✅ Metadados carregados: ${video.videoWidth}x${video.videoHeight}`);
-            logDebug(`⏱️ Duração: ${video.duration} segundos`);
-        });
-        
-        video.addEventListener('loadeddata', () => {
-            logDebug('✅ Dados do vídeo carregados');
-        });
-        
-        video.addEventListener('canplay', () => {
-            logDebug('▶️ Pronto para reproduzir');
-        });
-        
-        video.addEventListener('waiting', () => {
-            logDebug('⏳ Bufferizando...');
-        });
-        
-        video.addEventListener('error', (e) => {
-            const error = video.error;
-            let mensagem = '❌ Erro no vídeo: ';
-            
-            switch(error.code) {
-                case MediaError.MEDIA_ERR_ABORTED:
-                    mensagem += 'Carregamento abortado';
-                    break;
-                case MediaError.MEDIA_ERR_NETWORK:
-                    mensagem += 'Erro de rede';
-                    break;
-                case MediaError.MEDIA_ERR_DECODE:
-                    mensagem += 'Erro de decodificação';
-                    break;
-                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                    mensagem += 'Formato não suportado';
-                    break;
-                default:
-                    mensagem += 'Erro desconhecido';
+                log('❌ Erro no teste: ' + error.message);
             }
             
-            logDebug(mensagem);
-            erroVideo.style.display = 'block';
-            erroVideo.textContent = mensagem;
-        });
+            log('--- Fim do teste ---');
+        }
         
-        // Iniciar testes
-        testarProxy().then(sucesso => {
-            if (sucesso) {
-                testarVideo();
-            }
-        });
+        function recarregarProxy() {
+            log('🔄 Recarregando player proxy...');
+            playerProxy.load();
+        }
+        
+        // Testar automaticamente após 1 segundo
+        setTimeout(testarProxy, 1000);
     </script>
 </body>
 </html>
