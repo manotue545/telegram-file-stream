@@ -3,283 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player de Vídeo - Telegram</title>
+    <title>Telegram Video Player</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
             padding: 20px;
+            background: #0a0a0a;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .player-wrapper {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
         h1 {
-            color: white;
+            color: #4CAF50;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .player-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        h2 {
-            color: white;
+            margin-top: 0;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .badge {
-            background: #4CAF50;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.6em;
-            font-weight: normal;
+            font-size: 24px;
         }
         
         video {
             width: 100%;
-            border-radius: 10px;
+            border-radius: 8px;
             background: #000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        .info-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-            color: white;
+        .info {
+            margin-top: 15px;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
             word-break: break-all;
         }
         
-        .info-box code {
-            background: rgba(0,0,0,0.5);
-            padding: 2px 5px;
-            border-radius: 3px;
-            color: #ffd700;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-decoration: none;
+        .download-btn {
             display: inline-block;
-        }
-        
-        .btn-primary {
+            margin-top: 15px;
+            padding: 10px 20px;
             background: #4CAF50;
             color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-        }
-        
-        .btn-download {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-download:hover {
-            background: #f57c00;
-            transform: translateY(-2px);
-        }
-        
-        .debug-panel {
-            background: #1a1a1a;
-            border-radius: 10px;
-            padding: 20px;
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 14px;
-            max-height: 200px;
-            overflow: auto;
-            border: 1px solid #333;
-        }
-        
-        .file-id-display {
-            background: rgba(0,0,0,0.5);
-            padding: 15px;
+            text-decoration: none;
             border-radius: 5px;
-            color: #fff;
-            font-family: monospace;
-            margin: 20px 0;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #45a049;
+        }
+        
+        .status {
+            color: #4CAF50;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Telegram Video Player</h1>
-        
-        <!-- Player com API Route -->
-        <div class="player-card">
-            <h2>
-                📹 Player com API (Seguro)
-                <span class="badge">Node.js</span>
-            </h2>
+        <div class="player-wrapper">
+            <h1>📹 Telegram Video Player</h1>
             
             <video id="videoPlayer" controls preload="auto">
                 <source src="/api/video?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ" type="video/mp4">
             </video>
             
-            <div class="info-box">
-                <strong>File ID:</strong> 
-                <code>BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ</code>
-            </div>
-            
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="testarAPI()">🔍 Testar API</button>
-                <button class="btn btn-secondary" onclick="recarregarVideo()">🔄 Recarregar</button>
+            <div style="text-align: center;">
                 <a href="/api/video?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ&download=1" 
-                   class="btn btn-download">
-                    ⬇️ Download
+                   class="download-btn">
+                    ⬇️ Baixar Vídeo
                 </a>
             </div>
-        </div>
-        
-        <!-- Player com Link Direto (Comparação) -->
-        <div class="player-card">
-            <h2>
-                🔗 Player com Link Direto
-                <span class="badge">Inseguro</span>
-            </h2>
             
-            <video controls preload="auto">
-                <source src="https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4" type="video/mp4">
-            </video>
-            
-            <div class="info-box">
-                <strong>URL Direta:</strong><br>
-                <code>https://api.telegram.org/file/bot8274275591:AAHDIz1Z7dpGQDesNQBES3Q7FoA_vxhG1eQ/videos/file_1.mp4</code>
+            <div class="info" id="status">
+                Carregando vídeo...
             </div>
-        </div>
-        
-        <!-- Painel de Debug -->
-        <div class="player-card">
-            <h2>🔧 Diagnóstico</h2>
-            <div class="debug-panel" id="debugPanel">
-                Sistema pronto. Clique em "Testar API" para verificar...
+            
+            <div class="info">
+                <strong>File ID:</strong><br>
+                <code style="color: #ff9800;">BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ</code>
             </div>
         </div>
     </div>
     
     <script>
         const video = document.getElementById('videoPlayer');
-        const debugPanel = document.getElementById('debugPanel');
+        const status = document.getElementById('status');
         
-        function log(message) {
-            const time = new Date().toLocaleTimeString();
-            debugPanel.innerHTML += `[${time}] ${message}\n`;
-            debugPanel.scrollTop = debugPanel.scrollHeight;
-        }
-        
-        async function testarAPI() {
-            log('🔍 Iniciando teste da API...');
-            
-            try {
-                // Teste 1: HEAD request
-                log('📡 Fazendo HEAD request...');
-                const headRes = await fetch('/api/video?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
-                    method: 'HEAD'
-                });
-                
-                log(`📊 Status: ${headRes.status} ${headRes.statusText}`);
-                
-                // Mostrar headers
-                const headers = {};
-                headRes.headers.forEach((value, key) => {
-                    headers[key] = value;
-                    log(`   📌 ${key}: ${value}`);
-                });
-                
-                // Teste 2: Range request
-                log('📦 Testando Range Request...');
-                const rangeRes = await fetch('/api/video?file_id=BAACAgEAAxkBAAMGaZnkR4Dvk4TUAAEhRCLZT4Q0dH0xAALuBQACF83QRAR7In6WfoMOOgQ', {
-                    headers: { 'Range': 'bytes=0-1023' }
-                });
-                
-                log(`📊 Status Range: ${rangeRes.status}`);
-                
-                if (rangeRes.status === 206) {
-                    const blob = await rangeRes.blob();
-                    log(`   ✅ Range funcionando: ${blob.size} bytes`);
-                }
-                
-                // Teste 3: Verificar Content-Type
-                if (headers['content-type']?.includes('video')) {
-                    log('✅ Content-Type correto: video/*');
-                } else {
-                    log(`❌ Content-Type incorreto: ${headers['content-type']}`);
-                }
-                
-            } catch (error) {
-                log(`❌ Erro: ${error.message}`);
-            }
-            
-            log('--- Teste concluído ---\n');
-        }
-        
-        function recarregarVideo() {
-            log('🔄 Recarregando vídeo...');
-            video.load();
-        }
-        
-        // Eventos do vídeo
         video.addEventListener('loadedmetadata', () => {
-            log(`✅ Vídeo carregado: ${video.videoWidth}x${video.videoHeight} | ${Math.round(video.duration)}s`);
+            status.innerHTML = `✅ Vídeo carregado - ${video.videoWidth}x${video.videoHeight} | ${Math.round(video.duration)}s`;
+            status.style.color = '#4CAF50';
         });
         
-        video.addEventListener('error', (e) => {
-            log(`❌ Erro no vídeo: ${video.error?.message || 'desconhecido'}`);
+        video.addEventListener('error', () => {
+            status.innerHTML = '❌ Erro ao carregar vídeo';
+            status.style.color = '#ff6b6b';
         });
         
-        // Limpar debug inicial
-        debugPanel.innerHTML = 'Sistema pronto. Clique em "Testar API" para verificar...\n';
+        video.addEventListener('waiting', () => {
+            status.innerHTML = '⏳ Bufferizando...';
+            status.style.color = '#ff9800';
+        });
+        
+        video.addEventListener('canplay', () => {
+            status.innerHTML = '▶️ Pronto para reproduzir';
+            status.style.color = '#4CAF50';
+        });
     </script>
 </body>
 </html>
