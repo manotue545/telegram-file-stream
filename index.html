@@ -3,78 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player de Vídeo</title>
+    <title>Redirecionando...</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             background: #000;
-            min-height: 100vh;
+            color: white;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            text-align: center;
         }
         
         .container {
-            width: 100%;
-            max-width: 1000px;
             padding: 20px;
         }
         
-        video {
-            width: 100%;
-            border-radius: 8px;
+        .loading {
+            margin: 20px 0;
         }
         
-        .error-message {
-            color: white;
-            text-align: center;
-            padding: 20px;
-            background: #333;
-            border-radius: 8px;
-            margin-top: 20px;
+        .spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #ff4757;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .direct-link {
             color: #ff4757;
-            word-break: break-all;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: #333;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .direct-link:hover {
+            background: #444;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <video controls autoplay playsinline id="player">
-            <source src="https://lightspeedst.net/s2/mp4_temp/ao-no-miburo-serizawa-ansatsu-hen/1/480p.mp4" type="video/mp4">
-            <source src="https://lightspeedst.net/s2/mp4_temp/ao-no-miburo-serizawa-ansatsu-hen/1/480p.mp4" type="video/mp4">
-            Seu navegador não suporta a tag de vídeo.
-        </video>
-        
-        <div class="error-message" id="errorMsg" style="display: none;">
-            <p>❌ Não foi possível carregar o vídeo automaticamente.</p>
-            <p>Clique no link abaixo para assistir diretamente:</p>
-            <a href="https://lightspeedst.net/s2/mp4_temp/ao-no-miburo-serizawa-ansatsu-hen/1/480p.mp4" 
-               class="direct-link" 
-               target="_blank">
-                📺 Abrir vídeo diretamente
-            </a>
+        <h1>🎬 Player de Vídeo</h1>
+        <div class="loading">
+            <p>Redirecionando para o player nativo...</p>
+            <div class="spinner"></div>
         </div>
+        <p>Se não for redirecionado automaticamente:</p>
+        <a href="https://lightspeedst.net/s2/mp4_temp/ao-no-miburo-serizawa-ansatsu-hen/1/480p.mp4" 
+           class="direct-link" 
+           target="_blank">
+            📺 Clique aqui para abrir o vídeo
+        </a>
     </div>
 
     <script>
-        const video = document.getElementById('player');
-        const errorMsg = document.getElementById('errorMsg');
-        
-        video.addEventListener('error', function() {
-            errorMsg.style.display = 'block';
-        });
-        
-        // Timeout de 5 segundos para carregamento
+        // Redireciona automaticamente após 2 segundos
         setTimeout(function() {
-            if(video.readyState === 0) {
-                errorMsg.style.display = 'block';
-            }
-        }, 5000);
+            window.location.href = "https://lightspeedst.net/s2/mp4_temp/ao-no-miburo-serizawa-ansatsu-hen/1/480p.mp4";
+        }, 2000);
     </script>
 </body>
 </html>
